@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -12,8 +13,10 @@ public class GameController : MonoBehaviour
     
     [SerializeField] float incrementoMeta;
     [SerializeField] Text textoScore;
+    [SerializeField] Text textoRecord;
     float meta;
-    int score;
+    int score, record;
+    
     
 
     private void Awake()
@@ -26,7 +29,10 @@ public class GameController : MonoBehaviour
     void Start()
     {
         score = 0;
-        AtualizaHUD();
+        record = 0;
+        CarregaRecord();
+        AtualizaRecordHUD();
+        AtualizaScoreHUD();
         meta = Mathf.Log(meta + incrementoMeta, 2f);
     }
 
@@ -36,7 +42,7 @@ public class GameController : MonoBehaviour
         if (Input.GetButtonDown("Fire1"))
         {
             score += 1;
-            AtualizaHUD();
+            AtualizaScoreHUD();
         }
 
         if (score >= meta)
@@ -44,10 +50,44 @@ public class GameController : MonoBehaviour
             meta += Mathf.Log(meta + incrementoMeta, 2f) * 10;
             SceneManager.LoadScene("Level02");
         }
+
+        if (Input.GetButtonDown("Cancel"))
+        {
+            SairDoJogo();
+        }
     }
 
-    void AtualizaHUD()
+    void AtualizaScoreHUD()
     {
         textoScore.text = "Noot noot: " + score;
+    }
+
+    void AtualizaRecordHUD()
+    {
+        textoRecord.text = "Doot doot: " + record;
+    }
+
+    void CarregaRecord()
+    {
+        if (PlayerPrefs.HasKey("record"))
+        {
+            record = PlayerPrefs.GetInt("record");
+        }
+        AtualizaRecordHUD();
+    }
+
+    void SairDoJogo()
+    {
+        if (score > record)
+        {
+            PlayerPrefs.SetInt("record", score);
+        }
+
+
+#if UNITY_EDITOR
+        EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 }
